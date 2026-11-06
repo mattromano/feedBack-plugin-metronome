@@ -228,16 +228,18 @@ function _metTick() {
     _metFlash(isMeasure);
 }
 
-// Node-only export hook for tests; browsers fall through to the polling
-// loop + playSong wrapping below.
-if (typeof module !== 'undefined' && module.exports) {
+// Node-only export hook for tests; the browser-only startup below
+// is skipped there. (A bare top-level `return` here was a SyntaxError in the
+// browser, so the whole plugin failed to load.)
+const _metIsNode = typeof module !== 'undefined' && module.exports;
+if (_metIsNode) {
     module.exports = {
         _metSettings, _metState, _metClick, _metFlash, _metBindVolumeSlider,
         _metBindFlashCheck, _metInjectButton, _metSyncUi, _metToggle,
         _metSetVolume, _metGetHighway, _metEnsureDrawHookInstalled, _metTick,
     };
-    return;
 }
+if (!_metIsNode) {
 
 // Register draw hook on the highway renderer for the visual flash
 _metEnsureDrawHookInstalled();
@@ -297,3 +299,4 @@ window[TICK_INTERVAL_ID_KEY] = setInterval(function() {
 
 // Rebind existing controls immediately on script initialization/re-evaluation.
 _metInjectButton();
+} // end browser-only startup
